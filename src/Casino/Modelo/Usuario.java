@@ -1,17 +1,20 @@
 package Casino.Modelo;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 public class Usuario {
-    private String username;
-    private String password;
-    private String nombre;
+    private final String username;
+    private final String password;
+    private final String nombre;
+
+    private final List<Resultado> historial = new ArrayList<>();
+
     public Usuario(String username, String password, String nombre) {
         this.username = username;
         this.password = password;
-        setNombre(nombre);
-    }
-
-    public Usuario() {
-        this("invitado", "1234", "Invitado");
+        this.nombre = nombre;
     }
 
     public boolean validarCredenciales(String u, String p) {
@@ -19,14 +22,13 @@ public class Usuario {
     }
 
     public String getNombre() { return nombre; }
+    public String getUsername() { return username; }
 
-    public void setNombre(String nombre) {
-        if (nombre == null || nombre.isBlank())
-            throw new IllegalArgumentException("El nombre no puede estar vacío");
-        this.nombre = nombre.trim();
+    public void agregarResultado(Resultado r) {
+        if (r != null) historial.add(r);
     }
 
-    public String getUsername() { return username; }
-    public String getPassword() { return password; }
+    public List<Resultado> getHistorial() {
+        return Collections.unmodifiableList(historial);
+    }
 }
-
