@@ -1,85 +1,79 @@
 package Casino.vista;
 
 import Casino.Controlador.RuletaControl;
-import Casino.Controlador.SesionControl;
+import Casino.Modelo.Resultado;
 import Casino.Modelo.TipoApuesta;
-import Casino.Modelo.Ruleta;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class VentanaRuleta {
-    private final JFrame frame = new JFrame("Juego Ruleta (MVC)");
-    private final JComboBox<TipoApuesta> cboTipo = new JComboBox<>(TipoApuesta.values());
+public class VentanaRuleta extends JFrame {
+    private final RuletaControl controller;
+
+    private final JComboBox<String> cmbTipo =
+            new JComboBox<>(new String[]{"COLOR", "PARIDAD", "NUMERO"});
+    private final JComboBox<String> cmbColor =
+            new JComboBox<>(new String[]{"Rojo", "Negro"});
+    private final JComboBox<String> cmbParidad =
+            new JComboBox<>(new String[]{"Par", "Impar"});
+    private final JTextField txtNumero = new JTextField("17");
     private final JTextField txtMonto = new JTextField("100");
+    private final JTextArea txtResultado = new JTextArea(6, 40);
     private final JButton btnGirar = new JButton("Girar");
-    private final JButton btnHistorial = new JButton("Ver Historial");
-    private final JButton btnVolver = new JButton("Volver al Menú");
-    private final JTextArea txtSalida = new JTextArea();
 
-    private final RuletaControl ruletaCtrl;
-    private final SesionControl session;
+    public VentanaRuleta(RuletaControl controller) {
+        super("Ruleta");
+        this.controller = controller;
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLayout(new BorderLayout(8,8));
 
-    public VentanaRuleta(SesionControl session) {
-        this.session = session;
-        this.ruletaCtrl = new RuletaControl(session);
+        JPanel pnlTop = new JPanel(new GridLayout(2, 1, 6, 6));
+        JPanel fila1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        fila1.add(new JLabel("Tipo:"));
+        fila1.add(cmbTipo);
+        fila1.add(new JLabel("Color:"));
+        fila1.add(cmbColor);
+        fila1.add(new JLabel("Paridad:"));
+        fila1.add(cmbParidad);
+        fila1.add(new JLabel("Número:"));
+        fila1.add(txtNumero);
 
-        frame.setSize(820, 420);
-        frame.setLayout(new BorderLayout(10, 10));
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setLocationRelativeTo(null);
+        JPanel fila2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        fila2.add(new JLabel("Monto:"));
+        fila2.add(txtMonto);
+        fila2.add(btnGirar);
 
-        JPanel north = new JPanel(new GridLayout(2, 3, 10, 10));
-        north.add(new JLabel("Tipo apuesta:"));
-        north.add(cboTipo);
-        north.add(new JLabel("Saldo: $" + ruletaCtrl.getSaldo()));
-        north.add(new JLabel("Monto:"));
-        north.add(txtMonto);
-        north.add(new JLabel());
+        pnlTop.add(fila1);
+        pnlTop.add(fila2);
 
-        JPanel acciones = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        acciones.add(btnGirar);
-        acciones.add(btnHistorial);
-        acciones.add(btnVolver);
+        add(pnlTop, BorderLayout.NORTH);
+        add(new JScrollPane(txtResultado), BorderLayout.CENTER);
 
-        txtSalida.setEditable(false);
-        txtSalida.setFont(new Font("Arial", Font.BOLD, 15));
-        txtSalida.setRows(15);
-        JScrollPane scroll = new JScrollPane(txtSalida);
+        btnGirar.addActionListener(e -> girar());
 
-        frame.add(north, BorderLayout.NORTH);
-        frame.add(acciones, BorderLayout.CENTER);
-        frame.add(scroll, BorderLayout.SOUTH);
-
-        btnGirar.addActionListener(e -> jugar());
-        btnHistorial.addActionListener(e -> mostrarHistorial());
-        btnVolver.addActionListener(e -> {
-            frame.dispose();
-            new VentanaMenu(session).mostrar();
-        });
+        pack();
+        setLocationRelativeTo(null);
     }
 
-    private void jugar() {
+    private void girar() {
         try {
+            TipoApuesta tipo = TipoApuesta.valueOf(cmbTipo.getSelectedItem().toString());
+            String eleccion = switch (tipo) {
+                case COLOR -> cmbColor.getSelectedItem().toString();
+                case PARIDAD -> cmbParidad.getSelectedItem().toString();
+                case NUMERO -> txtNumero.getText().trim();
+            };
             int monto = Integer.parseInt(txtMonto.getText().trim());
-            TipoApuesta tipo = (TipoApuesta) cboTipo.getSelectedItem();
-            Ruleta.ResultadoJugada r = ruletaCtrl.jugar(tipo, monto);
-            txtSalida.setText(r.descripcion);
-            ((JLabel)((JPanel)frame.getContentPane().getComponent(0)).getComponent(2))
-                    .setText("Saldo: $" + ruletaCtrl.getSaldo());
-        } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(frame, "Monto inválido");
+            Resultado r = controller.apostarYGirar(tipo, eleccion, monto);
+
+            txtResultado.append(String.format(
+                    "Giro: %d  | Rojo:%s Par:%s | Tipo:%s | Monto:%d | Ganancia:%d%n",
+                    r.getNumero(), r.isEsRojo(), r.isEsPar(), r.getTipo(), r.getMonto(), r.getGanancia()
+            ));
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(frame, ex.getMessage());
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(),
+                    "Apuesta inválida", JOptionPane.ERROR_MESSAGE);
         }
     }
-
-    private void mostrarHistorial() {
-        StringBuilder sb = new StringBuilder();
-        for (String h : ruletaCtrl.historial()) sb.append(h).append("\n");
-        txtSalida.setText(sb.toString());
-    }
-
-    public void mostrar() { frame.setVisible(true); }
 }
 

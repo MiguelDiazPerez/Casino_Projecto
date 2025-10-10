@@ -8,7 +8,6 @@ public class Usuario {
     private final String username;
     private final String password;
     private final String nombre;
-
     private final List<Resultado> historial = new ArrayList<>();
 
     public Usuario(String username, String password, String nombre) {
@@ -23,7 +22,6 @@ public class Usuario {
 
     public String getNombre() { return nombre; }
     public String getUsername() { return username; }
-
     public void agregarResultado(Resultado r) {
         if (r != null) historial.add(r);
     }

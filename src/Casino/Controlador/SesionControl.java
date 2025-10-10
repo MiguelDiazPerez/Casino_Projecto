@@ -1,8 +1,8 @@
-package Casino.controlador;
+package Casino.Controlador;
 
 import Casino.Modelo.Usuario;
 
-public class SesionControl{
+public class SesionControl {
     private Usuario usuarioActual;
 
     public void login(Usuario u) {
