@@ -5,10 +5,10 @@ import Casino.Modelo.Resultado;
 import java.util.Comparator;
 import java.util.List;
 
-public class HistorialController {
+public class ResultadoControl {
     private final SesionControl session;
 
-    public HistorialController(SesionControl session) {
+    public ResultadoControl(SesionControl session) {
         this.session = session;
     }
 

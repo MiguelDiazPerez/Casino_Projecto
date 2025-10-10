@@ -1,6 +1,6 @@
 package Casino.vista;
 
-import Casino.Controlador.HistorialController;
+import Casino.Controlador.ResultadoControl;
 import Casino.Modelo.Resultado;
 
 import javax.swing.*;
@@ -9,13 +9,13 @@ import java.awt.*;
 import java.util.List;
 
 public class VentanaHistorial extends JFrame {
-    private final HistorialController controller;
+    private final ResultadoControl controller;
     private final DefaultTableModel model =
             new DefaultTableModel(new Object[]{"Fecha", "N°", "Color", "Paridad", "Tipo", "Monto", "Ganancia"}, 0);
     private final JTable tabla = new JTable(model);
     private final JLabel lblSaldo = new JLabel();
 
-    public VentanaHistorial(HistorialController controller) {
+    public VentanaHistorial(ResultadoControl controller) {
         super("Historial de Jugadas");
         this.controller = controller;
 

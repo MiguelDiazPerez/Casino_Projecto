@@ -14,7 +14,7 @@ public class Main {
             session.login(u);
             Ruleta ruleta = new Ruleta();
             RuletaControl rc = new RuletaControl(session, ruleta);
-            HistorialController hc = new HistorialController(session);
+            ResultadoControl hc = new ResultadoControl(session);
             new VentanaRuleta(rc).setVisible(true);
             new VentanaHistorial(hc).setVisible(true);
         });
