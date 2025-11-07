@@ -13,6 +13,5 @@ public abstract class ApuestaBase {
     public int getMonto() { return monto; }
     public String getEtiqueta() { return etiqueta; }
 
-    /** Regla de acierto polimórfica */
     public abstract boolean acierta(int numero, String color);
 }
