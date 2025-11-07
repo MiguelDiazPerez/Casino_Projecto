@@ -9,15 +9,29 @@ public class Ruleta {
     );
     private final Random rng = new Random();
 
-    public int girar() {
-        return rng.nextInt(37); // 0..36
+    public int girar() { return rng.nextInt(37); }
+
+    public String colorDe(int n) {
+        if (n == 0) return "Verde";
+        return NUMEROS_ROJOS.contains(n) ? "Rojo" : "Negro";
     }
 
-    public boolean esRojo(int n) {
-        return NUMEROS_ROJOS.contains(n);
+    public boolean esPar(int n) { return n != 0 && (n % 2 == 0); }
+
+    public Resultado jugar(ApuestaBase apuesta) {
+        int numero = girar();
+        String color = colorDe(numero);
+        boolean acierta = apuesta.acierta(numero, color);
+
+        int ganancia = calcularGanancia(apuesta, acierta);
+        return new Resultado(
+                numero, color, esPar(numero),
+                apuesta.getEtiqueta(), apuesta.getMonto(), ganancia
+        );
     }
 
-    public boolean esPar(int n) {
-        return n != 0 && (n % 2 == 0);
+    private int calcularGanancia(ApuestaBase apuesta, boolean acierta) {
+        if (!acierta) return -apuesta.getMonto();
+        return apuesta.getMonto();
     }
 }

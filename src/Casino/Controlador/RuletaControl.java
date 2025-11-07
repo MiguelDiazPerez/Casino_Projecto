@@ -11,45 +11,20 @@ public class RuletaControl {
         this.ruleta = ruleta;
     }
 
-    public Resultado apostarYGirar(TipoApuesta tipo, String eleccion, int monto) {
-        if (!session.haySesion()) throw new IllegalStateException("No hay usuario en sesión");
-
-        int numero = ruleta.girar();
-        boolean esRojo = ruleta.esRojo(numero);
-        boolean esPar  = ruleta.esPar(numero);
-        boolean acierto = switch (tipo) {
-            case COLOR -> {
-                boolean eligioRojo = "rojo".equalsIgnoreCase(eleccion);
-                boolean eligioNegro = "negro".equalsIgnoreCase(eleccion);
-                yield (eligioRojo && esRojo) || (eligioNegro && !esRojo && numero != 0);
-            }
-            case PARIDAD -> {
-                boolean eligioPar = "par".equalsIgnoreCase(eleccion);
-                boolean eligioImpar = "impar".equalsIgnoreCase(eleccion);
-                yield (eligioPar && esPar) || (eligioImpar && !esPar && numero != 0);
-            }
-            case NUMERO -> {
-                try {
-                    int n = Integer.parseInt(eleccion);
-                    yield n == numero;
-                } catch (NumberFormatException e) {
-                    yield false;
-                }
-            }
+    public ApuestaBase crearApuesta(String tipoUI, int monto) {
+        return switch (tipoUI.toLowerCase()) {
+            case "rojo"  -> new ApuestaRojo(monto);
+            case "negro" -> new ApuestaNegro(monto);
+            case "par"   -> new ApuestaPar(monto);
+            case "impar" -> new ApuestaImpar(monto);
+            default -> throw new IllegalArgumentException("Tipo de apuesta no soportado: " + tipoUI);
         };
-
-        int ganancia = calcularGanancia(tipo, acierto, monto);
-
-        Resultado r = new Resultado(numero, esRojo, esPar, tipo, monto, ganancia);
-        session.getUsuarioActual().agregarResultado(r);
-        return r;
     }
 
-    private int calcularGanancia(TipoApuesta tipo, boolean acierto, int monto) {
-        if (!acierto) return -monto;
-        return switch (tipo) {
-            case COLOR, PARIDAD -> monto;
-            case NUMERO          -> monto * 35;
-        };
+    public Resultado apostarYGirar(ApuestaBase apuesta) {
+        if (!session.haySesion()) throw new IllegalStateException("No hay usuario en sesión");
+        Resultado r = ruleta.jugar(apuesta);
+        session.getUsuarioActual().agregarResultado(r);
+        return r;
     }
 }
